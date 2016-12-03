@@ -1,22 +1,24 @@
 'use strict';
 
 module.exports = function(gulp) {
-  let tasks         = {},
-      bootstrap     = require('bootstrap-styl'),
-      changed       = require('gulp-changed'),
-      concat        = require('gulp-concat'),
-      cssnano       = require('gulp-cssnano'),
-      postcss       = require('gulp-postcss'),
-      stylus        = require('gulp-stylus'),
-      lost          = require('lost'),
-      pxtorem       = require('postcss-pxtorem'),
-      autoprefixer  = require('autoprefixer'),
-      rupture       = require('rupture'),
-      mqpacker      = require('css-mqpacker'),
-      plumber       = require('gulp-plumber'),
-      gulpif        = require('gulp-if'),
-      flexibility   = require('postcss-flexibility'),
-      error         = require('error');
+  let tasks             = {},
+      bootstrap         = require('bootstrap-styl'),
+      changed           = require('gulp-changed'),
+      concat            = require('gulp-concat'),
+      cssnano           = require('gulp-cssnano'),
+      postcss           = require('gulp-postcss'),
+      stylus            = require('gulp-stylus'),
+      sass              = require('gulp-sass'),
+      breakpointSlicer  = require('breakpoint-slicer'),
+      lost              = require('lost'),
+      pxtorem           = require('postcss-pxtorem'),
+      autoprefixer      = require('autoprefixer'),
+      rupture           = require('rupture'),
+      mqpacker          = require('css-mqpacker'),
+      plumber           = require('gulp-plumber'),
+      gulpif            = require('gulp-if'),
+      flexibility       = require('postcss-flexibility'),
+      error             = require('error');
 
   const supportedBrowsers = ['last 2 versions', 'Android >= 5', 'IE >= 9'],
         cssNanoConfig     = { zindex: false, minifyFontValues: false };
@@ -32,7 +34,29 @@ module.exports = function(gulp) {
       return gulp.src(sources)
         .pipe(plumber({errorHandler: error}))
         .pipe(stylus(config))
-        .pipe(postcss([
+        .pipe(gulp.dest(destinyDir));
+
+    }
+  }
+
+
+  tasks.sass: function (sources, destinyDir, output, customVars) {
+    return function() {
+      let config = {
+        'file': breakpointSlicer()
+      };
+
+      return gulp.src(sources)
+        .pipe(plumber({errorHandler: error}))
+        .pipe(sass(config).on('error', sass.logError))
+        .pipe(gulp.dest(destinyDir));
+
+    }
+  }
+
+  task.postCss: function(sources, destinyDir) {
+    return gulp.src(sources)
+      .pipe(postcss([
           lost(),
           pxtorem(),
           mqpacker(),
@@ -44,7 +68,6 @@ module.exports = function(gulp) {
         .pipe(concat(output))
         .pipe(cssnano(cssNanoConfig))
         .pipe(gulp.dest(destinyDir));
-    }
   }
 
   tasks.bootstrap: function (sources, destinyDir) {
